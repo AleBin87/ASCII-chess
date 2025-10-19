@@ -2,6 +2,7 @@ import re
 from collections import defaultdict
 import os
 import sys
+import copy
 
 
 sq_pattern = re.compile(r"^[a-h][1-8]$", re.IGNORECASE)
@@ -9,6 +10,7 @@ sq_pattern = re.compile(r"^[a-h][1-8]$", re.IGNORECASE)
 
 class Chessboard:
     en_passant = False
+    check = False
 
     def __init__(self):
         squares = defaultdict()
@@ -53,7 +55,6 @@ class Piece:
             raise ValueError("Invalid position")
         self.color = color
         self.position = position
-        # board.squares[position] = position
 
 
 class Pawn(Piece):
@@ -63,9 +64,9 @@ class Pawn(Piece):
     def __init__(self, color, position, board):
         super().__init__(color, position, board)
 
-    def move(self, start_pos, final_pos, board):
+    def move(self, start_pos, final_pos, board) -> int:
         if start_pos == final_pos:
-            print("Invalid move")
+            # print("Invalid move")
             return 0
         if (
             self.color == "white"
@@ -76,8 +77,8 @@ class Pawn(Piece):
         ):
             if (int(final_pos[1]) - int(start_pos[1])) == 2:
                 if board.squares[final_pos[0] + str(int(final_pos[1]) - 1)] == " ":
-                    self.position = final_pos
-                    print(f"Pawn to {final_pos}")
+                    # self.position = final_pos
+                    # print(f"Pawn to {final_pos}")
                     if (
                         sq_pattern.search(chr(ord(final_pos[0]) - 1) + final_pos[1])
                         != None
@@ -108,10 +109,10 @@ class Pawn(Piece):
                         self.en_passant = 1
                     return 1
                 else:
-                    print("Invalid move")
+                    # print("Invalid move")
                     return 0
             else:
-                print(f"Pawn to {final_pos}")
+                # print(f"Pawn to {final_pos}")
                 return 1
         elif (
             self.color == "black"
@@ -122,8 +123,8 @@ class Pawn(Piece):
         ):
             if (int(start_pos[1]) - int(final_pos[1])) == 2:
                 if board.squares[final_pos[0] + str(int(final_pos[1]) + 1)] == " ":
-                    self.position = final_pos
-                    print(f"Pawn to {final_pos}")
+                    # self.position = final_pos
+                    # print(f"Pawn to {final_pos}")
                     if (
                         sq_pattern.search(chr(ord(final_pos[0]) - 1) + final_pos[1])
                         != None
@@ -154,10 +155,10 @@ class Pawn(Piece):
                         self.en_passant = 1
                     return 1
                 else:
-                    print("Invalid move")
+                    # print("Invalid move")
                     return 0
             else:
-                print(f"Pawn to {final_pos}")
+                # print(f"Pawn to {final_pos}")
                 return 1
         elif (
             self.color == "white"
@@ -165,8 +166,8 @@ class Pawn(Piece):
             and (ord(start_pos[0]) - ord(final_pos[0])) == 1
             and board.squares[final_pos] != " "
         ):
-            self.position = final_pos
-            print(f"Pawn to {final_pos}")
+            # self.position = final_pos
+            # print(f"Pawn to {final_pos}")
             return 1
         elif (
             self.color == "white"
@@ -174,8 +175,8 @@ class Pawn(Piece):
             and (ord(final_pos[0]) - ord(start_pos[0])) == 1
             and board.squares[final_pos] != " "
         ):
-            self.position = final_pos
-            print(f"Pawn to {final_pos}")
+            # self.position = final_pos
+            # print(f"Pawn to {final_pos}")
             return 1
         elif (
             self.color == "black"
@@ -183,8 +184,8 @@ class Pawn(Piece):
             and (ord(start_pos[0]) - ord(final_pos[0])) == 1
             and board.squares[final_pos] != " "
         ):
-            self.position = final_pos
-            print(f"Pawn to {final_pos}")
+            # self.position = final_pos
+            # print(f"Pawn to {final_pos}")
             return 1
         elif (
             self.color == "black"
@@ -192,8 +193,8 @@ class Pawn(Piece):
             and (ord(final_pos[0]) - ord(start_pos[0])) == 1
             and board.squares[final_pos] != " "
         ):
-            self.position = final_pos
-            print(f"Pawn to {final_pos}")
+            # self.position = final_pos
+            # print(f"Pawn to {final_pos}")
             return 1
         elif (
             self.color == "white"
@@ -201,8 +202,8 @@ class Pawn(Piece):
             and (int(final_pos[1]) - int(start_pos[1]) == 1)
             and board.squares[final_pos] == " "
         ):
-            self.position = final_pos
-            print(f"Pawn to {final_pos}")
+            # self.position = final_pos
+            # print(f"Pawn to {final_pos}")
             return 1
         elif (
             self.color == "black"
@@ -210,8 +211,8 @@ class Pawn(Piece):
             and (int(start_pos[1]) - int(final_pos[1]) == 1)
             and board.squares[final_pos] == " "
         ):
-            self.position = final_pos
-            print(f"Pawn to {final_pos}")
+            # self.position = final_pos
+            # print(f"Pawn to {final_pos}")
             return 1
         elif self.en_passant == 1:
             if (
@@ -221,8 +222,8 @@ class Pawn(Piece):
                 and isinstance(board.squares[final_pos[0] + start_pos[1]], Pawn)
                 and board.squares[final_pos[0] + start_pos[1]].en_passant == 1
             ):
-                self.position = final_pos
-                print(f"Pawn to {final_pos}")
+                # self.position = final_pos
+                # print(f"Pawn to {final_pos}")
                 board.squares[final_pos[0] + start_pos[1]].on_the_board = 0
                 board.squares[final_pos[0] + start_pos[1]] = " "
                 return 1
@@ -233,8 +234,8 @@ class Pawn(Piece):
                 and isinstance(board.squares[final_pos[0] + start_pos[1]], Pawn)
                 and board.squares[final_pos[0] + start_pos[1]].en_passant == 1
             ):
-                self.position = final_pos
-                print(f"Pawn to {final_pos}")
+                # self.position = final_pos
+                # print(f"Pawn to {final_pos}")
                 board.squares[final_pos[0] + start_pos[1]].on_the_board = 0
                 board.squares[final_pos[0] + start_pos[1]] = " "
                 return 1
@@ -245,8 +246,8 @@ class Pawn(Piece):
                 and isinstance(board.squares[final_pos[0] + start_pos[1]], Pawn)
                 and board.squares[final_pos[0] + start_pos[1]].en_passant == 1
             ):
-                self.position = final_pos
-                print(f"Pawn to {final_pos}")
+                # self.position = final_pos
+                # print(f"Pawn to {final_pos}")
                 board.squares[final_pos[0] + start_pos[1]].on_the_board = 0
                 board.squares[final_pos[0] + start_pos[1]] = " "
                 return 1
@@ -257,14 +258,18 @@ class Pawn(Piece):
                 and isinstance(board.squares[final_pos[0] + start_pos[1]], Pawn)
                 and board.squares[final_pos[0] + start_pos[1]].en_passant == 1
             ):
-                self.position = final_pos
-                print(f"Pawn to {final_pos}")
+                # self.position = final_pos
+                # print(f"Pawn to {final_pos}")
                 board.squares[final_pos[0] + start_pos[1]].on_the_board = 0
                 board.squares[final_pos[0] + start_pos[1]] = " "
                 return 1
+            else:
+                return 0
         else:
-            print("Invalid move")
+            # print("Invalid move")
             return 0
+
+    def promote(self): ...
 
     def __str__(self) -> str:
         if self.color == "white":
@@ -279,9 +284,9 @@ class Knight(Piece):
     def __init__(self, color, position, board):
         super().__init__(color, position, board)
 
-    def move(self, start_pos, final_pos, board):
+    def move(self, start_pos, final_pos, board) -> int:
         if start_pos == final_pos:
-            print("Invalid move")
+            # print("Invalid move")
             return 0
         if (
             (
@@ -317,11 +322,11 @@ class Knight(Piece):
                 and (int(final_pos[1]) == int(start_pos[1]) - 1)
             )
         ):
-            self.position = final_pos
-            print(f"Knight to {final_pos}")
+            # self.position = final_pos
+            # print(f"Knight to {final_pos}")
             return 1
         else:
-            print("Invalid move")
+            # print("Invalid move")
             return 0
 
     def __str__(self) -> str:
@@ -337,14 +342,14 @@ class Bishop(Piece):
     def __init__(self, color, position, board):
         super().__init__(color, position, board)
 
-    def move(self, start_pos, final_pos, board):
+    def move(self, start_pos, final_pos, board) -> int:
         i = 1
         if start_pos == final_pos:
-            print("Invalid move")
+            # print("Invalid move")
             return 0
         while i <= 9:
             if i == 9:
-                print("Invalid move")
+                # print("Invalid move")
                 return 0
             if (
                 ord(start_pos[0]) == ord(final_pos[0]) - i
@@ -358,14 +363,14 @@ class Bishop(Piece):
                         board.squares[final_pos] != " "
                         and board.squares[final_pos].color == "white"
                     ):
-                        print("Invalid move")
+                        # print("Invalid move")
                         return 0
                 else:
                     if (
                         board.squares[final_pos] != " "
                         and board.squares[final_pos].color == "black"
                     ):
-                        print("Invalid move")
+                        # print("Invalid move")
                         return 0
                 i -= 1
                 while i > 0:
@@ -379,7 +384,7 @@ class Bishop(Piece):
                             ]
                             != " "
                         ):
-                            print("Invalid move")
+                            # print("Invalid move")
                             return 0
                     elif (
                         ord(final_pos[0]) > ord(start_pos[0])
@@ -391,7 +396,7 @@ class Bishop(Piece):
                             ]
                             != " "
                         ):
-                            print("Invalid move")
+                            # print("Invalid move")
                             return 0
                     elif (
                         ord(final_pos[0]) < ord(start_pos[0])
@@ -403,7 +408,7 @@ class Bishop(Piece):
                             ]
                             != " "
                         ):
-                            print("Invalid move")
+                            # print("Invalid move")
                             return 0
                     elif (
                         ord(final_pos[0]) < ord(start_pos[0])
@@ -415,13 +420,14 @@ class Bishop(Piece):
                             ]
                             != " "
                         ):
-                            print("Invalid move")
+                            # print("Invalid move")
                             return 0
                     i -= 1
-                self.position = final_pos
-                print(f"Bishop to {final_pos}")
+                # self.position = final_pos
+                # print(f"Bishop to {final_pos}")
                 return 1
             i += 1
+        return 0
 
     def __str__(self) -> str:
         if self.color == "white":
@@ -437,32 +443,31 @@ class Rook(Piece):
     def __init__(self, color, position, board):
         super().__init__(color, position, board)
 
-    def move(self, start_pos, final_pos, board):
-        self.can_castle = 0
+    def move(self, start_pos, final_pos, board) -> int:
         if start_pos[0] == final_pos[0] and start_pos != final_pos:
             for x in range(
                 min(int(start_pos[1]), int(final_pos[1])) + 1,
                 max(int(start_pos[1]), int(final_pos[1])),
             ):
                 if board.squares[start_pos[0] + str(x)] != " ":
-                    print("Invalid move")
+                    # print("Invalid move")
                     return 0
             if (
                 self.color == "white"
                 and board.squares[final_pos] != " "
                 and board.squares[final_pos].color == "white"
             ):
-                print("Invalid move")
+                # print("Invalid move")
                 return 0
             elif (
                 self.color == "black"
                 and board.squares[final_pos] != " "
                 and board.squares[final_pos].color == "black"
             ):
-                print("Invalid move")
+                # print("Invalid move")
                 return 0
-            self.position = final_pos
-            print(f"Rook to {final_pos}")
+            # self.position = final_pos
+            # print(f"Rook to {final_pos}")
             return 1
         elif start_pos[1] == final_pos[1] and start_pos != final_pos:
             for x in range(
@@ -470,27 +475,27 @@ class Rook(Piece):
                 max(ord(start_pos[0]), ord(final_pos[0])),
             ):
                 if board.squares[chr(x) + start_pos[1]] != " ":
-                    print("Invalid move")
+                    # print("Invalid move")
                     return 0
             if (
                 self.color == "white"
                 and board.squares[final_pos] != " "
                 and board.squares[final_pos].color == "white"
             ):
-                print("Invalid move")
+                # print("Invalid move")
                 return 0
             elif (
                 self.color == "black"
                 and board.squares[final_pos] != " "
                 and board.squares[final_pos].color == "black"
             ):
-                print("Invalid move")
+                # print("Invalid move")
                 return 0
-            self.position = final_pos
-            print(f"Rook to {final_pos}")
+            # self.position = final_pos
+            # print(f"Rook to {final_pos}")
             return 1
         else:
-            print("Invalid move")
+            # print("Invalid move")
             return 0
 
     def __str__(self) -> str:
@@ -506,9 +511,9 @@ class Queen(Piece):
     def __init__(self, color, position, board):
         super().__init__(color, position, board)
 
-    def move(self, start_pos, final_pos, board):
+    def move(self, start_pos, final_pos, board) -> int:
         if start_pos == final_pos:
-            print("Invalid move")
+            # print("Invalid move")
             return 0
         if start_pos[0] == final_pos[0]:
             for x in range(
@@ -516,24 +521,24 @@ class Queen(Piece):
                 max(int(start_pos[1]), int(final_pos[1])),
             ):
                 if board.squares[start_pos[0] + str(x)] != " ":
-                    print("Invalid move")
+                    # print("Invalid move")
                     return 0
             if (
                 self.color == "white"
                 and board.squares[final_pos] != " "
                 and board.squares[final_pos].color == "white"
             ):
-                print("Invalid move")
+                # print("Invalid move")
                 return 0
             elif (
                 self.color == "black"
                 and board.squares[final_pos] != " "
                 and board.squares[final_pos].color == "black"
             ):
-                print("Invalid move")
+                # print("Invalid move")
                 return 0
-            self.position = final_pos
-            print(f"Queen to {final_pos}")
+            # self.position = final_pos
+            # print(f"Queen to {final_pos}")
             return 1
         elif start_pos[1] == final_pos[1]:
             for x in range(
@@ -541,30 +546,30 @@ class Queen(Piece):
                 max(ord(start_pos[0]), ord(final_pos[0])),
             ):
                 if board.squares[chr(x) + start_pos[1]] != " ":
-                    print("Invalid move")
+                    # print("Invalid move")
                     return 0
             if (
                 self.color == "white"
                 and board.squares[final_pos] != " "
                 and board.squares[final_pos].color == "white"
             ):
-                print("Invalid move")
+                # print("Invalid move")
                 return 0
             elif (
                 self.color == "black"
                 and board.squares[final_pos] != " "
                 and board.squares[final_pos].color == "black"
             ):
-                print("Invalid move")
+                # print("Invalid move")
                 return 0
-            self.position = final_pos
-            print(f"Queen to {final_pos}")
+            # self.position = final_pos
+            # print(f"Queen to {final_pos}")
             return 1
         else:
             i = 1
             while i <= 9:
                 if i == 9:
-                    print("Invalid move")
+                    # print("Invalid move")
                     return 0
                 if (
                     ord(start_pos[0]) == ord(final_pos[0]) - i
@@ -578,14 +583,14 @@ class Queen(Piece):
                             board.squares[final_pos] != " "
                             and board.squares[final_pos].color == "white"
                         ):
-                            print("Invalid move")
+                            # print("Invalid move")
                             return 0
                     else:
                         if (
                             board.squares[final_pos] != " "
                             and board.squares[final_pos].color == "black"
                         ):
-                            print("Invalid move")
+                            # print("Invalid move")
                             return 0
                     i -= 1
                     while i > 0:
@@ -600,7 +605,7 @@ class Queen(Piece):
                                 ]
                                 != " "
                             ):
-                                print("Invalid move")
+                                # print("Invalid move")
                                 return 0
                         elif (
                             ord(final_pos[0]) > ord(start_pos[0])
@@ -613,7 +618,7 @@ class Queen(Piece):
                                 ]
                                 != " "
                             ):
-                                print("Invalid move")
+                                # print("Invalid move")
                                 return 0
                         elif (
                             ord(final_pos[0]) < ord(start_pos[0])
@@ -626,7 +631,7 @@ class Queen(Piece):
                                 ]
                                 != " "
                             ):
-                                print("Invalid move")
+                                # print("Invalid move")
                                 return 0
                         elif (
                             ord(final_pos[0]) < ord(start_pos[0])
@@ -639,14 +644,14 @@ class Queen(Piece):
                                 ]
                                 != " "
                             ):
-                                print("Invalid move")
+                                # print("Invalid move")
                                 return 0
                         i -= 1
-                    self.position = final_pos
-                    print(f"Queen to {final_pos}")
+                    # self.position = final_pos
+                    # print(f"Queen to {final_pos}")
                     return 1
                 i += 1
-        print("Invalid move")
+        # print("Invalid move")
         return 0
 
     def __str__(self) -> str:
@@ -663,7 +668,7 @@ class King(Piece):
     def __init__(self, color, position, board):
         super().__init__(color, position, board)
 
-    def move(self, start_pos, final_pos, board):
+    def move(self, start_pos, final_pos, board) -> int:
         if (
             start_pos == "e1"
             and final_pos == "g1"
@@ -672,12 +677,11 @@ class King(Piece):
             and isinstance(board.squares["h1"], Rook)
             and board.squares["h1"].can_castle == 1
         ):
-            print("King castle")
-            self.position = final_pos
+            # print("King castle")
+            # self.position = final_pos
             board.squares["h1"].position = "f1"
             board.squares["f1"] = board.squares["h1"]
             board.squares["h1"] = " "
-            self.can_castle = 0
             return 1
         elif (
             start_pos == "e1"
@@ -687,12 +691,11 @@ class King(Piece):
             and isinstance(board.squares["a1"], Rook)
             and board.squares["a1"].can_castle == 1
         ):
-            print("King castle")
-            self.position = final_pos
+            # print("King castle")
+            # self.position = final_pos
             board.squares["a1"].position = "d1"
             board.squares["d1"] = board.squares["a1"]
             board.squares["a1"] = " "
-            self.can_castle = 0
             return 1
         elif (
             start_pos == "e8"
@@ -702,12 +705,11 @@ class King(Piece):
             and isinstance(board.squares["h8"], Rook)
             and board.squares["h8"].can_castle == 1
         ):
-            print("King castle")
-            self.position = final_pos
+            # print("King castle")
+            # self.position = final_pos
             board.squares["h8"].position = "f8"
             board.squares["f8"] = board.squares["h8"]
             board.squares["h8"] = " "
-            self.can_castle = 0
             return 1
         elif (
             start_pos == "e8"
@@ -717,14 +719,12 @@ class King(Piece):
             and isinstance(board.squares["a8"], Rook)
             and board.squares["a8"].can_castle == 1
         ):
-            print("King castle")
-            self.position = final_pos
+            # print("King castle")
+            # self.position = final_pos
             board.squares["a8"].position = "d8"
             board.squares["d8"] = board.squares["a8"]
             board.squares["a8"] = " "
-            self.can_castle = 0
             return 1
-        self.can_castle = 0
         if (
             (
                 ord(final_pos[0]) in range(ord(start_pos[0]) - 1, ord(start_pos[0]) + 2)
@@ -737,20 +737,20 @@ class King(Piece):
                     board.squares[final_pos] != " "
                     and board.squares[final_pos].color == "white"
                 ):
-                    print("Invalid move")
+                    # print("Invalid move")
                     return 0
             else:
                 if (
                     board.squares[final_pos] != " "
                     and board.squares[final_pos].color == "black"
                 ):
-                    print("Invalid move")
+                    # print("Invalid move")
                     return 0
-            self.position = final_pos
-            print(f"King to {final_pos}")
+            # self.position = final_pos
+            # print(f"King to {final_pos}")
             return 1
         else:
-            print("Invalid move")
+            # print("Invalid move")
             return 0
 
     def __str__(self) -> str:
@@ -765,6 +765,11 @@ def main():
     pieces = start_game(game)  # Initialize all pieces
     for piece in pieces:  # Put pieces on the chessboard
         game.squares[piece.position] = piece
+        if isinstance(piece, King):
+            if piece.color == "white":
+                wking = piece
+            else:
+                bking = piece
     white_turn = True
 
     while True:
@@ -792,6 +797,11 @@ def main():
                 continue
 
         os.system("cls")
+        if game.check == True:
+            if white_turn == True:
+                print("White is in check!")
+            else:
+                print("Black is in check!")
 
         if (
             sq_pattern.search(move_from) == None or sq_pattern.search(move_to) == None
@@ -814,13 +824,83 @@ def main():
                 print("Black to move")
                 continue
 
+        # in case of check the only valid moves are the ones that ends the check
+        if game.check == True:
+            game.check = False
+            game_in_check = Chessboard()
+            pieces_in_check = copy.deepcopy(pieces)  # duplicate pieces
+
+            for piece in pieces_in_check:  # put new pieces on the new board
+                if piece.on_the_board == 1:
+                    game_in_check.squares[piece.position] = piece
+                    if isinstance(piece, King):
+                        if piece.color == "white":
+                            wking_in_check = piece
+                        else:
+                            bking_in_check = piece
+
+            if game_in_check.squares[move_from] != " " and game_in_check.squares[
+                move_from
+            ].move(
+                move_from, move_to, game_in_check
+            ):  # try if the move is legal on a copy of the board
+                if game_in_check.squares[move_to] != " ":
+                    game_in_check.squares[move_to].on_the_board = 0
+                game_in_check.squares[move_from].position = move_to
+                game_in_check.squares[move_to] = game_in_check.squares[move_from]
+                game_in_check.squares[move_from] = " "
+
+                if white_turn == True:
+                    for piece in pieces_in_check:
+                        if piece.color == "black" and piece.on_the_board == 1:
+                            if piece.move(
+                                piece.position, wking_in_check.position, game_in_check
+                            ):
+                                game.check = True
+                                break
+                else:
+                    for piece in pieces_in_check:
+                        if piece.color == "white" and piece.on_the_board == 1:
+                            if piece.move(
+                                piece.position, bking_in_check.position, game_in_check
+                            ):
+                                game.check = True
+                                break
+            else:
+                game.check = True
+
+        if (
+            game.check == True
+        ):  # the last move didn't resolve the check so I ask for a new move
+            continue
+
+        if not game.squares[move_from].move(move_from, move_to, game):
+            print("Invalid move")
+
         if game.squares[move_from].move(move_from, move_to, game):
+            print(f"{game.squares[move_from]} {move_to}")
             if game.squares[move_to] != " ":
                 game.squares[move_to].on_the_board = (
                     0  # Eliminate the piece that was taken
                 )
+            if isinstance(game.squares[move_from], King) or isinstance(
+                game.squares[move_from], Rook
+            ):
+                game.squares[move_from].can_castle = 0
+            game.squares[move_from].position = move_to
             game.squares[move_to] = game.squares[move_from]
             game.squares[move_from] = " "
+
+            # Looking for checks
+            if white_turn == True:
+                if game.squares[move_to].move(move_to, bking.position, game):
+                    game.check = True
+                    print("Check!")
+            else:
+                if game.squares[move_to].move(move_to, wking.position, game):
+                    game.check = True
+                    print("Check!")
+
             if white_turn == True:
                 white_turn = False
             else:
