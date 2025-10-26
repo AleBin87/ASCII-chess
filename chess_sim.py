@@ -503,7 +503,7 @@ class King(Piece):
             and isinstance(board.squares["h1"], Rook)
             and board.squares["h1"].can_castle == 1
         ):
-            return 1
+            return 4
         elif (
             start_pos == "e1"
             and final_pos == "c1"
@@ -514,7 +514,7 @@ class King(Piece):
             and isinstance(board.squares["a1"], Rook)
             and board.squares["a1"].can_castle == 1
         ):
-            return 1
+            return 5
         elif (
             start_pos == "e8"
             and final_pos == "g8"
@@ -524,7 +524,7 @@ class King(Piece):
             and isinstance(board.squares["h8"], Rook)
             and board.squares["h8"].can_castle == 1
         ):
-            return 1
+            return 4
         elif (
             start_pos == "e8"
             and final_pos == "c8"
@@ -535,7 +535,7 @@ class King(Piece):
             and isinstance(board.squares["a8"], Rook)
             and board.squares["a8"].can_castle == 1
         ):
-            return 1
+            return 5
         if (
             (
                 ord(final_pos[0]) in range(ord(start_pos[0]) - 1, ord(start_pos[0]) + 2)
@@ -571,11 +571,11 @@ def main():
     pieces = start_game(game)  # Initialize all pieces
     for piece in pieces:  # Put pieces on the chessboard
         game.squares[piece.position] = piece
-        if isinstance(piece, King):
-            if piece.color == "white":
-                wking = piece
-            else:
-                bking = piece
+        # if isinstance(piece, King):
+        #    if piece.color == "white":
+        #        wking = piece
+        #    else:
+        #        bking = piece
     white_turn = True
     en_passant_count = 0
 
@@ -626,63 +626,16 @@ def main():
                 print("Black to move")
                 continue
 
-        # in case of check the only valid moves are the ones that ends the check
-        if game.check == True:
-            game.check = False
-            game_in_check = Chessboard()
-            pieces_in_check = copy.deepcopy(pieces)  # duplicate pieces
-
-            for piece in pieces_in_check:  # put new pieces on the new board
-                if piece.on_the_board == 1:
-                    game_in_check.squares[piece.position] = piece
-                    if isinstance(piece, King):
-                        if piece.color == "white":
-                            wking_in_check = piece
-                        else:
-                            bking_in_check = piece
-
-            if game_in_check.squares[move_from] != " " and game_in_check.squares[
-                move_from
-            ].move(
-                move_from, move_to, game_in_check
-            ):  # try if the move is legal on a copy of the board
-                if game_in_check.squares[move_to] != " ":
-                    game_in_check.squares[move_to].on_the_board = 0
-                game_in_check.squares[move_from].position = move_to
-                game_in_check.squares[move_to] = game_in_check.squares[move_from]
-                game_in_check.squares[move_from] = " "
-
-                if white_turn == True:
-                    for piece in pieces_in_check:
-                        if piece.color == "black" and piece.on_the_board == 1:
-                            if piece.move(
-                                piece.position, wking_in_check.position, game_in_check
-                            ):
-                                game.check = True
-                                break
-                else:
-                    for piece in pieces_in_check:
-                        if piece.color == "white" and piece.on_the_board == 1:
-                            if piece.move(
-                                piece.position, bking_in_check.position, game_in_check
-                            ):
-                                game.check = True
-                                break
-            else:
-                game.check = True
-
-        if (
-            game.check == True
-        ):  # the last move didn't resolve the check so I ask for a new move
-            continue
-
-        if not game.squares[move_from].move(move_from, move_to, game):
-            print("Invalid move")
-
         if game.squares[move_from].move(move_from, move_to, game):
-            if (
-                game.squares[move_from].move(move_from, move_to, game) == 2
-            ):  # enable en passant
+            if not is_legal(move_from, move_to, game):
+                print("Illegal move")
+                continue
+
+        match game.squares[move_from].move(move_from, move_to, game):
+            case 0:
+                print("Invalid move")
+                continue
+            case 2:  # enable en passant
                 print(f"{game.squares[move_from]} {move_to}")
                 game.squares[move_from].en_passant = 1
                 if sq_pattern.search(
@@ -699,18 +652,11 @@ def main():
                 ):
                     game.squares[chr(ord(move_to[0]) + 1) + move_to[1]].en_passant = 1
                     game.en_passant = True
-            elif (
-                game.squares[move_from].move(move_from, move_to, game) == 3
-            ):  # en passant
+            case 3:  # en passant
                 print(f"{game.squares[move_from]} {move_to}")
                 game.squares[move_to[0] + move_from[1]].on_the_board = 0
                 game.squares[move_to[0] + move_from[1]] = " "
-            elif (
-                (move_from == "e1" and move_to == "g1")
-                or (move_from == "e8" and move_to == "g8")
-            ) and isinstance(
-                game.squares[move_from], King
-            ):  # check for castling
+            case 4:  # castling short
                 print("O-O")
                 if move_from == "e1":
                     if isinstance(game.squares["h1"], Piece):
@@ -722,10 +668,7 @@ def main():
                         game.squares["h8"].position = "f8"
                     game.squares["f8"] = game.squares["h8"]
                     game.squares["h8"] = " "
-            elif (
-                (move_from == "e1" and move_to == "c1")
-                or (move_from == "e8" and move_to == "c8")
-            ) and isinstance(game.squares[move_from], King):
+            case 5:  # castling long
                 print("O-O-O")
                 if move_from == "e1":
                     if isinstance(game.squares["a1"], Piece):
@@ -737,53 +680,57 @@ def main():
                         game.squares["a8"].position = "d8"
                     game.squares["d8"] = game.squares["a8"]
                     game.squares["a8"] = " "
-            else:
+            case 1:
                 print(f"{game.squares[move_from]} {move_to}")
 
-            if game.squares[move_to] != " ":
-                game.squares[move_to].on_the_board = (
-                    0  # Eliminate the piece that was taken
-                )
-            if isinstance(game.squares[move_from], King) or isinstance(
-                game.squares[move_from], Rook
-            ):
-                game.squares[move_from].can_castle = 0
-            game.squares[move_from].position = move_to
-            game.squares[move_to] = game.squares[move_from]
-            game.squares[move_from] = " "
+        if game.squares[move_to] != " ":
+            game.squares[move_to].on_the_board = 0  # Eliminate the piece that was taken
+        if isinstance(game.squares[move_from], King) or isinstance(
+            game.squares[move_from], Rook
+        ):
+            game.squares[move_from].can_castle = 0
+        game.squares[move_from].position = move_to
+        game.squares[move_to] = game.squares[move_from]
+        game.squares[move_from] = " "
 
-            if isinstance(game.squares[move_to], Pawn) and (
-                move_to[1] == "1" or move_to[1] == "8"
-            ): # promotion of pawns that reach the last rank
-                game.squares[move_to].on_the_board = 0
-                game.squares[move_to] = game.squares[move_to].promote(move_to, game)
-                pieces.append(game.squares[move_to])
+        if isinstance(game.squares[move_to], Pawn) and (
+            move_to[1] == "1" or move_to[1] == "8"
+        ):  # promotion of pawns that reach the last rank
+            game.squares[move_to].on_the_board = 0
+            game.squares[move_to] = game.squares[move_to].promote(move_to, game)
+            pieces.append(game.squares[move_to])
 
-            # Looking for checks
-            if white_turn == True:
-                if game.squares[move_to].move(move_to, bking.position, game):
-                    game.check = True
-                    print("Check!")
-            else:
-                if game.squares[move_to].move(move_to, wking.position, game):
-                    game.check = True
-                    print("Check!")
+        game.check = is_check(white_turn, game)
+        if game.check == True:
+            print("Check!")
 
-            if white_turn == True:
-                white_turn = False
-            else:
-                white_turn = True
+        if is_stalemate(white_turn, game):
+            print("Stalemate")
+            break
 
-            if (
-                game.en_passant == True and en_passant_count == 1
-            ):  # resets en_passant on the board and on Pawns
-                game.en_passant = False
-                en_passant_count = 0
-                for piece in pieces:
-                    if isinstance(piece, Pawn) and piece.en_passant == 1:
-                        piece.en_passant = 0
-            if game.en_passant == True and en_passant_count == 0:
-                en_passant_count = 1
+        if white_turn == True:
+            if is_checkmate(white_turn, game):
+                print("White wins!")
+                print(game)
+                break
+            white_turn = False
+        else:
+            if is_checkmate(white_turn, game):
+                print("Black wins!")
+                print(game)
+                break
+            white_turn = True
+
+        if (
+            game.en_passant == True and en_passant_count == 1
+        ):  # resets en_passant on the board and on Pawns
+            game.en_passant = False
+            en_passant_count = 0
+            for piece in pieces:
+                if isinstance(piece, Pawn) and piece.en_passant == 1:
+                    piece.en_passant = 0
+        if game.en_passant == True and en_passant_count == 0:
+            en_passant_count = 1
 
 
 def start_game(game):
@@ -853,6 +800,152 @@ def start_game(game):
         qb,
         kb,
     ]
+
+
+def is_legal(move_from: str, move_to: str, board: Chessboard) -> bool:
+    game_legal = copy.deepcopy(board)
+    pieces_legal = []
+
+    for square in game_legal.squares.keys():
+        if game_legal.squares[square] != " ":
+            pieces_legal.append(game_legal.squares[square])
+        if isinstance(game_legal.squares[square], King):
+            if game_legal.squares[square].color == "white":
+                wking_legal = game_legal.squares[square].position
+            else:
+                bking_legal = game_legal.squares[square].position
+
+    if game_legal.squares[move_from].color == "white" and game_legal.squares[move_from].move(move_from, move_to, board):
+        if game_legal.squares[move_to] != " ":
+            game_legal.squares[move_to].on_the_board = 0
+        if isinstance(game_legal.squares[move_from], King):
+            wking_legal = move_to
+        game_legal.squares[move_from].position = move_to
+        game_legal.squares[move_to] = game_legal.squares[move_from]
+        game_legal.squares[move_from] = " "
+        for piece in pieces_legal:
+            if piece.color == "black" and piece.on_the_board == 1:
+                if piece.move(piece.position, wking_legal, game_legal):
+                    return False
+    elif game_legal.squares[move_from].color == "black" and game_legal.squares[move_from].move(move_from, move_to, board):
+        if game_legal.squares[move_to] != " ":
+            game_legal.squares[move_to].on_the_board = 0
+        if isinstance(game_legal.squares[move_from], King):
+            bking_legal = move_to
+        game_legal.squares[move_from].position = move_to
+        game_legal.squares[move_to] = game_legal.squares[move_from]
+        game_legal.squares[move_from] = " "
+        for piece in pieces_legal:
+            if piece.color == "white" and piece.on_the_board == 1:
+                if piece.move(piece.position, bking_legal, game_legal):
+                    return False
+
+    return True
+
+
+def is_check(turn: bool, board: Chessboard) -> bool:
+    if turn == True:  # white turn
+        for square in board.squares.keys():
+            if (
+                isinstance(board.squares[square], King)
+                and board.squares[square].color == "black"
+            ):
+                bkp = board.squares[square].position
+                break
+        for square in board.squares.keys():
+            if (
+                isinstance(board.squares[square], Piece)
+                and board.squares[square].color == "white"
+                and board.squares[square].on_the_board == 1
+            ):
+                if board.squares[square].move(
+                    board.squares[square].position, bkp, board
+                ):
+                    return True
+    else:  # black turn
+        for square in board.squares.keys():
+            if (
+                isinstance(board.squares[square], King)
+                and board.squares[square].color == "white"
+            ):
+                wkp = board.squares[square].position
+                break
+        for square in board.squares.keys():
+            if (
+                isinstance(board.squares[square], Piece)
+                and board.squares[square].color == "black"
+                and board.squares[square].on_the_board == 1
+            ):
+                if board.squares[square].move(
+                    board.squares[square].position, wkp, board
+                ):
+                    return True
+    return False
+
+
+def is_checkmate(turn: bool, board: Chessboard) -> bool:
+    if board.check == False:
+        return False
+
+    if turn == True:  # white turn
+        for square in board.squares.keys():
+            if (
+                isinstance(board.squares[square], Piece)
+                and board.squares[square].color == "black"
+                and board.squares[square].on_the_board == 1
+            ):
+                for move_to in board.squares.keys():
+                    if board.squares[square].move(
+                        board.squares[square].position, move_to, board
+                    ) != 0 and is_legal(board.squares[square].position, move_to, board):
+                        return False
+        return True
+
+    else:  # black turn
+        for square in board.squares.keys():
+            if (
+                isinstance(board.squares[square], Piece)
+                and board.squares[square].color == "white"
+                and board.squares[square].on_the_board == 1
+            ):
+                for move_to in board.squares.keys():
+                    if board.squares[square].move(
+                        board.squares[square].position, move_to, board
+                    ) != 0 and is_legal(board.squares[square].position, move_to, board):
+                        return False
+    return True
+
+
+def is_stalemate(turn: bool, board: Chessboard) -> bool:
+    if board.check == True:
+        return False
+    if turn == True:  # white turn
+        for square in board.squares.keys():
+            if (
+                isinstance(board.squares[square], Piece)
+                and board.squares[square].color == "black"
+                and board.squares[square].on_the_board == 1
+            ):
+                for move_to in board.squares.keys():
+                    if board.squares[square].move(
+                        board.squares[square].position, move_to, board
+                    ) != 0 and is_legal(board.squares[square].position, move_to, board):
+                        return False
+        return True
+
+    else:  # black turn
+        for square in board.squares.keys():
+            if (
+                isinstance(board.squares[square], Piece)
+                and board.squares[square].color == "white"
+                and board.squares[square].on_the_board == 1
+            ):
+                for move_to in board.squares.keys():
+                    if board.squares[square].move(
+                        board.squares[square].position, move_to, board
+                    ) != 0 and is_legal(board.squares[square].position, move_to, board):
+                        return False
+        return True
 
 
 if __name__ == "__main__":
