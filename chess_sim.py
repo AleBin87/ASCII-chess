@@ -502,6 +502,9 @@ class King(Piece):
             and self.can_castle == 1
             and isinstance(board.squares["h1"], Rook)
             and board.squares["h1"].can_castle == 1
+            and board.check == False
+            and not is_attacked(True, "f1", board)
+            and not is_attacked(True, "g1", board)
         ):
             return 4
         elif (
@@ -513,6 +516,9 @@ class King(Piece):
             and self.can_castle == 1
             and isinstance(board.squares["a1"], Rook)
             and board.squares["a1"].can_castle == 1
+            and board.check == False
+            and not is_attacked(True, "c1", board)
+            and not is_attacked(True, "d1", board)
         ):
             return 5
         elif (
@@ -523,6 +529,9 @@ class King(Piece):
             and self.can_castle == 1
             and isinstance(board.squares["h8"], Rook)
             and board.squares["h8"].can_castle == 1
+            and board.check == False
+            and not is_attacked(False, "f8", board)
+            and not is_attacked(False, "g8", board)
         ):
             return 4
         elif (
@@ -534,6 +543,9 @@ class King(Piece):
             and self.can_castle == 1
             and isinstance(board.squares["a8"], Rook)
             and board.squares["a8"].can_castle == 1
+            and board.check == False
+            and not is_attacked(False, "c8", board)
+            and not is_attacked(False, "d8", board)
         ):
             return 5
         if (
@@ -946,6 +958,28 @@ def is_stalemate(turn: bool, board: Chessboard) -> bool:
                     ) != 0 and is_legal(board.squares[square].position, move_to, board):
                         return False
         return True
+
+
+def is_attacked(turn: bool, square: str, board: Chessboard) -> bool:
+    if turn == True:
+        for piece in board.squares.keys():
+            if (
+                isinstance(board.squares[piece], Piece)
+                and board.squares[piece].color == "black"
+                and board.squares[piece].on_the_board == 1
+            ):
+                if board.squares[piece].move(board.squares[piece].position, square, board):
+                    return True
+    else:
+        for piece in board.squares.keys():
+            if (
+                isinstance(board.squares[piece], Piece)
+                and board.squares[piece].color == "white"
+                and board.squares[piece].on_the_board == 1
+            ):
+                if board.squares[piece].move(board.squares[piece].position, square, board):
+                    return True
+    return False
 
 
 if __name__ == "__main__":
