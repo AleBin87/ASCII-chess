@@ -746,72 +746,44 @@ def main():
 
 
 def start_game(game):
-    Pa = Pawn("white", "a2", game)
-    Pb = Pawn("white", "b2", game)
-    Pc = Pawn("white", "c2", game)
-    Pd = Pawn("white", "d2", game)
-    Pe = Pawn("white", "e2", game)
-    Pf = Pawn("white", "f2", game)
-    Pg = Pawn("white", "g2", game)
-    Ph = Pawn("white", "h2", game)
-    pa = Pawn("black", "a7", game)
-    pb = Pawn("black", "b7", game)
-    pc = Pawn("black", "c7", game)
-    pd = Pawn("black", "d7", game)
-    pe = Pawn("black", "e7", game)
-    pf = Pawn("black", "f7", game)
-    pg = Pawn("black", "g7", game)
-    ph = Pawn("black", "h7", game)
-    Ra = Rook("white", "a1", game)
-    Rh = Rook("white", "h1", game)
-    Nb = Knight("white", "b1", game)
-    Ng = Knight("white", "g1", game)
-    Bc = Bishop("white", "c1", game)
-    Bf = Bishop("white", "f1", game)
-    Qw = Queen("white", "d1", game)
-    Kw = King("white", "e1", game)
-    ra = Rook("black", "a8", game)
-    rh = Rook("black", "h8", game)
-    nb = Knight("black", "b8", game)
-    ng = Knight("black", "g8", game)
-    bc = Bishop("black", "c8", game)
-    bf = Bishop("black", "f8", game)
-    qb = Queen("black", "d8", game)
-    kb = King("black", "e8", game)
-    return [
-        Pa,
-        Pb,
-        Pc,
-        Pd,
-        Pe,
-        Pf,
-        Pg,
-        Ph,
-        pa,
-        pb,
-        pc,
-        pd,
-        pe,
-        pf,
-        pg,
-        ph,
-        Ra,
-        Rh,
-        Nb,
-        Ng,
-        Bc,
-        Bf,
-        Qw,
-        Kw,
-        ra,
-        rh,
-        nb,
-        ng,
-        bc,
-        bf,
-        qb,
-        kb,
-    ]
+    pieces = []
+    for square in game.squares:
+        if square[1] == "2":
+            pieces.append(Pawn("white", square, game))
+        elif square[1] == "7":
+            pieces.append(Pawn("black", square, game))
+        elif square[1] in ("1", "8"):
+            if square[0] in ("a", "h"):
+                (
+                    pieces.append(Rook("white", square, game))
+                    if square[1] == "1"
+                    else pieces.append(Rook("black", square, game))
+                )
+            elif square[0] in ("b", "g"):
+                (
+                    pieces.append(Knight("white", square, game))
+                    if square[1] == "1"
+                    else pieces.append(Knight("black", square, game))
+                )
+            elif square[0] in ("c", "f"):
+                (
+                    pieces.append(Bishop("white", square, game))
+                    if square[1] == "1"
+                    else pieces.append(Bishop("black", square, game))
+                )
+            elif square[0] == "d":
+                (
+                    pieces.append(Queen("white", square, game))
+                    if square[1] == "1"
+                    else pieces.append(Queen("black", square, game))
+                )
+            elif square[0] == "e":
+                (
+                    pieces.append(King("white", square, game))
+                    if square[1] == "1"
+                    else pieces.append(King("black", square, game))
+                )
+    return pieces
 
 
 def is_legal(move_from: str, move_to: str, board: Chessboard) -> bool:
@@ -827,7 +799,9 @@ def is_legal(move_from: str, move_to: str, board: Chessboard) -> bool:
             else:
                 bking_legal = game_legal.squares[square].position
 
-    if game_legal.squares[move_from].color == "white" and game_legal.squares[move_from].move(move_from, move_to, board):
+    if game_legal.squares[move_from].color == "white" and game_legal.squares[
+        move_from
+    ].move(move_from, move_to, board):
         if game_legal.squares[move_to] != " ":
             game_legal.squares[move_to].on_the_board = 0
         if isinstance(game_legal.squares[move_from], King):
@@ -839,7 +813,9 @@ def is_legal(move_from: str, move_to: str, board: Chessboard) -> bool:
             if piece.color == "black" and piece.on_the_board == 1:
                 if piece.move(piece.position, wking_legal, game_legal):
                     return False
-    elif game_legal.squares[move_from].color == "black" and game_legal.squares[move_from].move(move_from, move_to, board):
+    elif game_legal.squares[move_from].color == "black" and game_legal.squares[
+        move_from
+    ].move(move_from, move_to, board):
         if game_legal.squares[move_to] != " ":
             game_legal.squares[move_to].on_the_board = 0
         if isinstance(game_legal.squares[move_from], King):
@@ -968,7 +944,9 @@ def is_attacked(turn: bool, square: str, board: Chessboard) -> bool:
                 and board.squares[piece].color == "black"
                 and board.squares[piece].on_the_board == 1
             ):
-                if board.squares[piece].move(board.squares[piece].position, square, board):
+                if board.squares[piece].move(
+                    board.squares[piece].position, square, board
+                ):
                     return True
     else:
         for piece in board.squares.keys():
@@ -977,7 +955,9 @@ def is_attacked(turn: bool, square: str, board: Chessboard) -> bool:
                 and board.squares[piece].color == "white"
                 and board.squares[piece].on_the_board == 1
             ):
-                if board.squares[piece].move(board.squares[piece].position, square, board):
+                if board.squares[piece].move(
+                    board.squares[piece].position, square, board
+                ):
                     return True
     return False
 
