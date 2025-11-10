@@ -590,8 +590,14 @@ def main():
         #        bking = piece
     white_turn = True
     en_passant_count = 0
+    turn = 0
+
+    with open("chess_sim_PGN.txt", "w", encoding="utf-8") as pgn:
+        pgn.write("Created with chess_sim V1.0\n\n")
 
     while True:
+        if white_turn == True:
+            turn += 1
 
         print(game)
         while True:
@@ -648,6 +654,11 @@ def main():
                 print("Invalid move")
                 continue
             case 2:  # enable en passant
+                with open("chess_sim_PGN.txt", "a", encoding="utf-8") as pgn:
+                    if white_turn == True:
+                        pgn.write(f"{turn}.{move_to}")
+                    else:
+                        pgn.write(f" {move_to} ")
                 print(f"{game.squares[move_from]} {move_to}")
                 game.squares[move_from].en_passant = 1
                 if sq_pattern.search(
@@ -665,10 +676,20 @@ def main():
                     game.squares[chr(ord(move_to[0]) + 1) + move_to[1]].en_passant = 1
                     game.en_passant = True
             case 3:  # en passant
+                with open("chess_sim_PGN.txt", "a", encoding="utf-8") as pgn:
+                    if white_turn == True:
+                        pgn.write(f"{turn}.{move_from[0]}x{move_to}")
+                    else:
+                        pgn.write(f" {move_from[0]}x{move_to} ")
                 print(f"{game.squares[move_from]} {move_to}")
                 game.squares[move_to[0] + move_from[1]].on_the_board = 0
                 game.squares[move_to[0] + move_from[1]] = " "
             case 4:  # castling short
+                with open("chess_sim_PGN.txt", "a", encoding="utf-8") as pgn:
+                    if white_turn == True:
+                        pgn.write(f"{turn}.O-O")
+                    else:
+                        pgn.write(f" O-O ")
                 print("O-O")
                 if move_from == "e1":
                     if isinstance(game.squares["h1"], Piece):
@@ -681,6 +702,11 @@ def main():
                     game.squares["f8"] = game.squares["h8"]
                     game.squares["h8"] = " "
             case 5:  # castling long
+                with open("chess_sim_PGN.txt", "a", encoding="utf-8") as pgn:
+                    if white_turn == True:
+                        pgn.write(f"{turn}.O-O-O")
+                    else:
+                        pgn.write(f" O-O-O ")
                 print("O-O-O")
                 if move_from == "e1":
                     if isinstance(game.squares["a1"], Piece):
@@ -693,6 +719,29 @@ def main():
                     game.squares["d8"] = game.squares["a8"]
                     game.squares["a8"] = " "
             case 1:
+                with open("chess_sim_PGN.txt", "a", encoding="utf-8") as pgn:
+                    if white_turn == True:
+                        if isinstance(game.squares[move_from], Pawn):
+                            if game.squares[move_to] != " ":
+                                pgn.write(f"{turn}.{move_from[0]}x{move_to}")
+                            else:
+                                pgn.write(f"{turn}.{move_to}")
+                        else:
+                            if game.squares[move_to] != " ":
+                                pgn.write(f"{turn}.{game.squares[move_from]}x{move_to}")
+                            else:
+                                pgn.write(f"{turn}.{game.squares[move_from]}{move_to}")
+                    else:
+                        if isinstance(game.squares[move_from], Pawn):
+                            if game.squares[move_to] != " ":
+                                pgn.write(f" {move_from[0]}x{move_to} ")
+                            else:
+                                pgn.write(f" {move_to} ")
+                        else:
+                            if game.squares[move_to] != " ":
+                                pgn.write(f" {game.squares[move_from]}x{move_to} ")
+                            else:
+                                pgn.write(f" {game.squares[move_from]}{move_to} ")
                 print(f"{game.squares[move_from]} {move_to}")
 
         if game.squares[move_to] != " ":
@@ -714,20 +763,37 @@ def main():
 
         game.check = is_check(white_turn, game)
         if game.check == True:
+            with open("chess_sim_PGN.txt", "a", encoding="utf-8") as pgn:
+                if white_turn == True:
+                    pgn.write("+")
+                else:
+                    pgn.write("+ ")
             print("Check!")
 
         if is_stalemate(white_turn, game):
+            with open("chess_sim_PGN.txt", "a", encoding="utf-8") as pgn:
+                pgn.write(" 1/2 - 1/2")
             print("Stalemate")
             break
 
         if white_turn == True:
             if is_checkmate(white_turn, game):
+                with open("chess_sim_PGN.txt", "r", encoding="utf-8") as file:
+                    reader = file.read()
+                reader = reader[:-1] + "# 1-0"
+                with open("chess_sim_PGN.txt", "w", encoding="utf-8") as pgn:
+                    pgn.write(reader)
                 print("White wins!")
                 print(game)
                 break
             white_turn = False
         else:
             if is_checkmate(white_turn, game):
+                with open("chess_sim_PGN.txt", "r", encoding="utf-8") as file:
+                    reader = file.read()
+                reader = reader[:-3] + "# 0-1"
+                with open("chess_sim_PGN.txt", "w", encoding="utf-8") as pgn:
+                    pgn.write(reader)
                 print("Black wins!")
                 print(game)
                 break
