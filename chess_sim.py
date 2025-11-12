@@ -46,7 +46,6 @@ class Chessboard:
 
 
 class Piece:
-    on_the_board = 1
 
     def __init__(self, color: str, position: str, board: Chessboard):
         if color.lower() not in ["black", "white"]:
@@ -55,6 +54,7 @@ class Piece:
             raise ValueError("Invalid position")
         self.color = color
         self.position = position
+        self.on_the_board = 1
 
 
 class Pawn(Piece):
@@ -760,6 +760,44 @@ def main():
             game.squares[move_to].on_the_board = 0
             game.squares[move_to] = game.squares[move_to].promote(move_to, game)
             pieces.append(game.squares[move_to])
+            if white_turn == True:
+                if isinstance(game.squares[move_to], Queen):
+                    with open("chess_sim_PGN.txt", "a", encoding="utf-8") as pgn:
+                        pgn.write("=Q")
+                elif isinstance(game.squares[move_to], Rook):
+                    with open("chess_sim_PGN.txt", "a", encoding="utf-8") as pgn:
+                        pgn.write("=R")
+                elif isinstance(game.squares[move_to], Knight):
+                    with open("chess_sim_PGN.txt", "a", encoding="utf-8") as pgn:
+                        pgn.write("=N")
+                elif isinstance(game.squares[move_to], Bishop):
+                    with open("chess_sim_PGN.txt", "a", encoding="utf-8") as pgn:
+                        pgn.write("=B")
+            else:
+                if isinstance(game.squares[move_to], Queen):
+                    with open("chess_sim_PGN.txt", "r", encoding="utf-8") as file:
+                        reader = file.read()
+                    reader = reader[:-1] + "=Q "
+                    with open("chess_sim_PGN.txt", "w", encoding="utf-8") as pgn:
+                        pgn.write(reader)
+                elif isinstance(game.squares[move_to], Rook):
+                    with open("chess_sim_PGN.txt", "r", encoding="utf-8") as file:
+                        reader = file.read()
+                    reader = reader[:-1] + "=R "
+                    with open("chess_sim_PGN.txt", "w", encoding="utf-8") as pgn:
+                        pgn.write(reader)
+                elif isinstance(game.squares[move_to], Knight):
+                    with open("chess_sim_PGN.txt", "r", encoding="utf-8") as file:
+                        reader = file.read()
+                    reader = reader[:-1] + "=N "
+                    with open("chess_sim_PGN.txt", "w", encoding="utf-8") as pgn:
+                        pgn.write(reader)
+                elif isinstance(game.squares[move_to], Bishop):
+                    with open("chess_sim_PGN.txt", "r", encoding="utf-8") as file:
+                        reader = file.read()
+                    reader = reader[:-1] + "=B "
+                    with open("chess_sim_PGN.txt", "w", encoding="utf-8") as pgn:
+                        pgn.write(reader)
 
         game.check = is_check(white_turn, game)
         if game.check == True:
